@@ -4,6 +4,11 @@ clc
 clear
 clear('cam')
 
+%TODO:
+% Add shape for Motor?
+% Make arrows only 10 units long? Not all the way to the centroid
+% Send angle to the motor control
+
 % find webcam 
 cam_list = webcamlist;
 
@@ -113,15 +118,6 @@ for i = 1:items
     text(STATS(i).Centroid(1) - 10,STATS(i).Centroid(2) + 25, STATS(i).Shape, 'Color', STATS(i).Color);
 
 end
-%Offset from top left corner of the figure to the top left corner of the
-%image
-xImageSize = 640;
-yImageSize = 480;
-xOffset = 182;
-yOffset = 54;
-
-%quiver(xOffset, (yOffset), (STATS(2).Centroid(1) - xOffset), (STATS(2).Centroid(2) - yOffset), 0, "LineWidth", 2, "Color", STATS(2).Color);
-%quiver(xOffset, (yOffset + yImageSize), (STATS(2).Centroid(1) - xOffset), (-1* (yImageSize - STATS(2).Centroid(2) + yOffset)), 0, "LineWidth", 2, "Color", STATS(2).Color);
 hold off;
 
 
@@ -129,29 +125,59 @@ hold off;
 clc;
 close all;
 
+%Offset from top left corner of the figure to the top left corner of the
+%image
+imageSize = [640, 480];
+offsetToImage = [182, 54];
+
+% Calls the funciton to prompt the user to choose a shape
 shapeChoice = chooseShapes(data, STATS, items);
-quiver(xOffset, (yOffset + yImageSize), (STATS(shapeChoice).Centroid(1) - xOffset), (-1* (yImageSize - STATS(shapeChoice).Centroid(2) + yOffset)), 0, "LineWidth", 2, "Color", STATS(shapeChoice).Color);
 
-%TODO:
-% Calculate Angle
-% Add shape for Motor?
-% Add motor reference arrow?
-% Make arrows only 10 units long? Not all the way to the centroid
-% Plot a arc for the angle with a text box saying the angle
+% A set of points for the origin (bottom left of image), reference (top
+% left of image) and varaible (user selected centroid)
+originImagePoint = [offsetToImage(1), (offsetToImage(2) + imageSize(2))];
+refernceArrowPoint = [0, -imageSize(2)];
+variableArrowPoint = [(STATS(shapeChoice).Centroid(1) - offsetToImage(1)), (-1* (imageSize(2) - STATS(shapeChoice).Centroid(2) + offsetToImage(2)))];
+
+% Plot the reference arrow and text as well as the variable arrow
+quiver(originImagePoint(1), originImagePoint(2), refernceArrowPoint(1), refernceArrowPoint(2), 0, "LineWidth", 2, "Color", STATS(shapeChoice).Color);
+text(offsetToImage(1) + 20, offsetToImage(2) + 10, "Reference", 'Color', STATS(shapeChoice).Color, 'FontSize', 20);
+quiver(offsetToImage(1), (offsetToImage(2) + imageSize(2)), variableArrowPoint(1), variableArrowPoint(2), 0, "LineWidth", 2, "Color", STATS(shapeChoice).Color);
+
+% Calculate the angle between the reference and the variable arrows
+angle = acos(((refernceArrowPoint(1) * variableArrowPoint(1)) + (variableArrowPoint(2) * refernceArrowPoint(2))) / ...
+    ((((refernceArrowPoint(1))^2 + (refernceArrowPoint(2))^2)^0.5) * (((variableArrowPoint(1))^2 + (variableArrowPoint(2))^2)^0.5)));
+angle = round((angle * 180 / pi), 2);
+
+% Display an arc between reference and varaible arrows as well as the angle
+% Define parameters of the arc.
+%Change OriginImagePoints 1 an 2 to change origin of the arc
+radius = 50;
+% Define the angle theta as going from 30 to 150 degrees in 100 steps.
+theta = linspace(angle-90, -90, 100);
+% Define x and y using "Degrees" version of sin and cos.
+x = radius * cosd(theta) + originImagePoint(1); 
+y = radius * sind(theta) + originImagePoint(2); 
+% Now plot the points.
+plot(x, y, "Color", STATS(shapeChoice).Color, 'LineWidth', 2); 
+text(offsetToImage(1) + 5, (originImagePoint(2) - 100), "\theta = " + angle, 'Color', STATS(shapeChoice).Color, 'FontSize', 12);
 
 
+% Function that prompts the user for shape selection
 function shapeChoice = chooseShapes(data, STATS, items)
-    %shapeChoice = 0;
+    % Displays the list of shapes for the user to choose from
     fprintf("Select a shape from the list below: \n");
     for i = 1:items
         fprintf("%d. %s\n", i, strcat(STATS(i).Color, " ", STATS(i).Shape));
     end
     shapeChoice = input("Enter the Number for the chosen Shape: ");
     
+    % Make sure the user imput is valid
     while or((shapeChoice < 1), (shapeChoice > items))
         fprintf("\n\nPlease Try Again, %d is not a vaild choice\n", shapeChoice);
         fprintf("Enter and Number between 1 and %d\n", items(1));
-      
+        
+        % If the input is invalid, prompt them again
         fprintf("Select a shape from the list below: \n");
         for i = 1:items
             fprintf("%d. %s\n", i, strcat(STATS(i).Color, " ", STATS(i).Shape));
@@ -159,6 +185,7 @@ function shapeChoice = chooseShapes(data, STATS, items)
         shapeChoice = input("Enter the Number for the chosen Shape: ");
     end
     
+    % Plot a green dot at the centroid of the selected shape
     figure();
     imshow(data.cur);
     hold on;
@@ -169,20 +196,21 @@ function shapeChoice = chooseShapes(data, STATS, items)
     end
     plot(STATS(shapeChoice).Centroid(1),STATS(shapeChoice).Centroid(2),'kO','MarkerFaceColor', [0, 0.9, 0.2], 'MarkerEdgeColor', [1, 1, 0.2], 'MarkerSize', 10);
 
-    checkChoseShapeVal = checkChosenShape();
-    if (checkChoseShapeVal == 0)
-        chooseShapes(data, STATS, items);
-    else 
-       fprintf("Shape Choice is %d. %s\n", shapeChoice, strcat(STATS(shapeChoice).Color, " ", STATS(shapeChoice).Shape))
-    end
+% Uncommet to prompt the user to confirm their shape selection
+%     checkChoseShapeVal = checkChosenShape();
+%     if (checkChoseShapeVal == 0)
+%         chooseShapes(data, STATS, items);
+%     else 
+%        fprintf("Shape Choice is %d. %s\n", shapeChoice, strcat(STATS(shapeChoice).Color, " ", STATS(shapeChoice).Shape))
+%     end
     
 end
 
-
-
+% Function to prompt the user to ensure they chose the correct shape
 function shapeCheck = checkChosenShape()
     shapeCheck = input("Is the highlighted shape correct? (1/0): ");
     
+    % Make sure they input a 1 or 0
     while ((shapeCheck ~= 1) && (shapeCheck ~= 0))
         fprintf("Invalid Entry\n");
         shapeCheck = input("Is the highlighted shape correct? (1/0): ");
