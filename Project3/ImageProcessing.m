@@ -80,9 +80,9 @@ colorsNum = {[255,0,0], [0,255,0], [0,0,255], [255,255,0], [255,0,255], [0,255,2
 colorsName = ["Red", "Green", "Blue", "Yellow", "Magenta", "Cyan"];
 
 items = size(STATS);
-for i = 1:1
+for i = 1:items
     ratio = STATS(i).Perimeter / STATS(i).Area;
-    if ratio >= 0.5 && ratio < 0.9
+    if ratio >= 0.5 && ratio < 1.1
         STATS(i).Shape = "Triangle";
     elseif ratio < 0.5 && ratio >= 0.19
         STATS(i).Shape = "Square";
@@ -105,11 +105,12 @@ for i = 1:1
             STATS(i).colorIndex = j;
             STATS(i).lowestEuclideanDistance = currDistance;
         end
+        STATS(i).Color = colorsName{STATS(i).colorIndex};
     end
-
+    
     %Plot Centroid and Shape Label
     plot(STATS(i).Centroid(1),STATS(i).Centroid(2),'kO','MarkerFaceColor', 'k', 'MarkerSize', 3);
-    text(STATS(i).Centroid(1) - 10,STATS(i).Centroid(2) + 25, STATS(i).Shape, 'Color', colorsName{STATS(i).colorIndex});
+    text(STATS(i).Centroid(1) - 10,STATS(i).Centroid(2) + 25, STATS(i).Shape, 'Color', STATS(i).Color);
 
 end
 
@@ -117,15 +118,62 @@ hold off;
 
 
 %% GUI
+clc;
+close all;
 
-%%183, 54 - Offset from Top Left Corner to the Top Left Corner of the
-%%image in the figure
-% drawArrow = @(x,y) quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),0 );
-% drawArrow([0, STATS(1).Centroid(2)], [0, STATS(1).Centroid(1)]);
-GUI = uifigure;
-button1 = uibutton(GUI, 'Text', '1', 'Position', [100,200,100,22]);
-%button2 = uibutton(GUI, 'Text', '2', 'Position', [100,100,100,22], 'ButtonPushedFcn', buttonPushed);
+shapeChoice = chooseShapes(data, STATS, items);
+drawArrow([0 100], [0 100]);
 
-% function buttonPushed
-%     printf("Button Pushed\n");
-% end
+
+
+
+
+function shapeChoice = chooseShapes(data, STATS, items)
+    %shapeChoice = 0;
+    fprintf("Select a shape from the list below: \n");
+    for i = 1:items
+        fprintf("%d. %s\n", i, strcat(STATS(i).Color, " ", STATS(i).Shape));
+    end
+    shapeChoice = input("Enter the Number for the chosen Shape: ");
+    
+    while or((shapeChoice < 1), (shapeChoice > items))
+        fprintf("\n\nPlease Try Again, %d is not a vaild choice\n", shapeChoice);
+        fprintf("Enter and Number between 1 and %d\n", items(1));
+      
+        fprintf("Select a shape from the list below: \n");
+        for i = 1:items
+            fprintf("%d. %s\n", i, strcat(STATS(i).Color, " ", STATS(i).Shape));
+        end
+        shapeChoice = input("Enter the Number for the chosen Shape: ");
+    end
+    
+    figure();
+    imshow(data.cur);
+    hold on;
+    
+    for i = 1:items
+        plot(STATS(i).Centroid(1),STATS(i).Centroid(2),'kO','MarkerFaceColor', 'k', 'MarkerSize', 3);
+        text(STATS(i).Centroid(1) - 10,STATS(i).Centroid(2) + 25, STATS(i).Shape, 'Color', STATS(i).Color);
+    end
+    plot(STATS(shapeChoice).Centroid(1),STATS(shapeChoice).Centroid(2),'kO','MarkerFaceColor', [0, 0.9, 0.2], 'MarkerEdgeColor', [1, 1, 0.2], 'MarkerSize', 10);
+
+    checkChoseShapeVal = checkChosenShape();
+    if (checkChoseShapeVal == 0)
+        chooseShapes(data, STATS, items);
+    else 
+       fprintf("Shape Choice is %d. %s\n", shapeChoice, strcat(STATS(shapeChoice).Color, " ", STATS(shapeChoice).Shape))
+    end
+    
+end
+
+
+
+function shapeCheck = checkChosenShape()
+    shapeCheck = input("Is the highlighted shape correct? (1/0): ");
+    
+    while ((shapeCheck ~= 1) && (shapeCheck ~= 0))
+        fprintf("Invalid Entry\n");
+        shapeCheck = input("Is the highlighted shape correct? (1/0): ");
+    end
+
+end
