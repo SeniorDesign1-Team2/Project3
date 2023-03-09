@@ -113,7 +113,15 @@ for i = 1:items
     text(STATS(i).Centroid(1) - 10,STATS(i).Centroid(2) + 25, STATS(i).Shape, 'Color', STATS(i).Color);
 
 end
+%Offset from top left corner of the figure to the top left corner of the
+%image
+xImageSize = 640;
+yImageSize = 480;
+xOffset = 182;
+yOffset = 54;
 
+%quiver(xOffset, (yOffset), (STATS(2).Centroid(1) - xOffset), (STATS(2).Centroid(2) - yOffset), 0, "LineWidth", 2, "Color", STATS(2).Color);
+%quiver(xOffset, (yOffset + yImageSize), (STATS(2).Centroid(1) - xOffset), (-1* (yImageSize - STATS(2).Centroid(2) + yOffset)), 0, "LineWidth", 2, "Color", STATS(2).Color);
 hold off;
 
 
@@ -122,10 +130,14 @@ clc;
 close all;
 
 shapeChoice = chooseShapes(data, STATS, items);
-drawArrow([0 100], [0 100]);
+quiver(xOffset, (yOffset + yImageSize), (STATS(shapeChoice).Centroid(1) - xOffset), (-1* (yImageSize - STATS(shapeChoice).Centroid(2) + yOffset)), 0, "LineWidth", 2, "Color", STATS(shapeChoice).Color);
 
-
-
+%TODO:
+% Calculate Angle
+% Add shape for Motor?
+% Add motor reference arrow?
+% Make arrows only 10 units long? Not all the way to the centroid
+% Plot a arc for the angle with a text box saying the angle
 
 
 function shapeChoice = chooseShapes(data, STATS, items)
