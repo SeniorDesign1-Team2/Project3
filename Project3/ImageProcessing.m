@@ -125,46 +125,99 @@ hold off;
 clc;
 close all;
 
+figure();
+imshow(data.cur);
+hold on;
+    
+for i = 1:items
+    plot(STATS(i).Centroid(1),STATS(i).Centroid(2),'kO','MarkerFaceColor', 'k', 'MarkerSize', 3);
+    text(STATS(i).Centroid(1) - 10,STATS(i).Centroid(2) + 25, STATS(i).Shape, 'Color', STATS(i).Color);
+end
+
 %Offset from top left corner of the figure to the top left corner of the
 %image
 imageSize = [640, 480];
 offsetToImage = [182, 54];
 
 % Calls the funciton to prompt the user to choose a shape
-shapeChoice = chooseShapes(data, STATS, items);
+fprintf("Motor Location\n");
+shapeChoice1 = chooseShapes(STATS, items);
+clc;
+fprintf("Desired Variable Location\n");
+shapeChoice2 = chooseShapes(STATS, items);
+clc;
 
-% A set of points for the origin (bottom left of image), reference (top
-% left of image) and varaible (user selected centroid)
-originImagePoint = [offsetToImage(1), (offsetToImage(2) + imageSize(2))];
-refernceArrowPoint = [0, -imageSize(2)];
-variableArrowPoint = [(STATS(shapeChoice).Centroid(1) - offsetToImage(1)), (-1* (imageSize(2) - STATS(shapeChoice).Centroid(2) + offsetToImage(2)))];
+% A set of points for the motor (first selection), reference (directly
+% above the motor point, and the variable angle (second selection);
+variableArrowPoint1 = [STATS(shapeChoice1).Centroid(1), STATS(shapeChoice1).Centroid(2)];
+variableArrowPoint2 = [STATS(shapeChoice2).Centroid(1), STATS(shapeChoice2).Centroid(2)];
+relativePoint1 = [0, (STATS(shapeChoice1).Centroid(2) - offsetToImage(2))];
+relativePoint2 = [-(variableArrowPoint1(1) - variableArrowPoint2(1)), (variableArrowPoint1(2) - variableArrowPoint2(2))];
 
-% Plot the reference arrow and text as well as the variable arrow
-quiver(originImagePoint(1), originImagePoint(2), refernceArrowPoint(1), refernceArrowPoint(2), 0, "LineWidth", 2, "Color", STATS(shapeChoice).Color);
-text(offsetToImage(1) + 20, offsetToImage(2) + 10, "Reference", 'Color', STATS(shapeChoice).Color, 'FontSize', 20);
-quiver(offsetToImage(1), (offsetToImage(2) + imageSize(2)), variableArrowPoint(1), variableArrowPoint(2), 0, "LineWidth", 2, "Color", STATS(shapeChoice).Color);
+% Motor being at position 1
+quiver(variableArrowPoint1(1), variableArrowPoint1(2), relativePoint1(1), -relativePoint1(2), 0, "LineWidth", 2, "Color", STATS(shapeChoice1).Color);
+text((variableArrowPoint1(1) + 10), offsetToImage(2) + 10, "Reference", 'Color', STATS(shapeChoice1).Color, 'FontSize', 20);
+quiver(variableArrowPoint1(1), variableArrowPoint1(2), relativePoint2(1), -(relativePoint2(2)), 0, "LineWidth", 2, "Color", STATS(shapeChoice1).Color);
 
 % Calculate the angle between the reference and the variable arrows
-angle = acos(((refernceArrowPoint(1) * variableArrowPoint(1)) + (variableArrowPoint(2) * refernceArrowPoint(2))) / ...
-    ((((refernceArrowPoint(1))^2 + (refernceArrowPoint(2))^2)^0.5) * (((variableArrowPoint(1))^2 + (variableArrowPoint(2))^2)^0.5)));
+angle = acos(((relativePoint1(1) * relativePoint2(1)) + (relativePoint2(2) * relativePoint1(2))) / ...
+    ((((relativePoint1(1))^2 + (relativePoint1(2))^2)^0.5) * (((relativePoint2(1))^2 + (relativePoint2(2))^2)^0.5)));
 angle = round((angle * 180 / pi), 2);
 
 % Display an arc between reference and varaible arrows as well as the angle
 % Define parameters of the arc.
 %Change OriginImagePoints 1 an 2 to change origin of the arc
 radius = 50;
-% Define the angle theta as going from 30 to 150 degrees in 100 steps.
-theta = linspace(angle-90, -90, 100);
-% Define x and y using "Degrees" version of sin and cos.
-x = radius * cosd(theta) + originImagePoint(1); 
-y = radius * sind(theta) + originImagePoint(2); 
+% Define the angle theta as going from 90 degrees to the angle in degrees in 100 steps.
+if (relativePoint2(1) >= 0)
+    % Define x and y using "Degrees" version of sin and cos.
+    theta = linspace(angle-90, -90, 100);
+    x = radius * cosd(theta) + variableArrowPoint1(1); 
+    y = radius * sind(theta) + variableArrowPoint1(2);
+else
+    theta = linspace(-90, angle-90, 100);
+    % Define x and y using "Degrees" version of sin and cos.
+    x = radius * -cosd(theta) + variableArrowPoint1(1); 
+    y = radius * sind(theta) + variableArrowPoint1(2);
+end
+
+ 
 % Now plot the points.
-plot(x, y, "Color", STATS(shapeChoice).Color, 'LineWidth', 2); 
-text(offsetToImage(1) + 5, (originImagePoint(2) - 100), "\theta = " + angle, 'Color', STATS(shapeChoice).Color, 'FontSize', 12);
+plot(x, y, "Color", STATS(shapeChoice1).Color, 'LineWidth', 2); 
+%text(variableArrowPoint1(1) + 5, (variableArrowPoint1(2) - 100), "\theta = " + angle, 'Color', STATS(shapeChoice1).Color, 'FontSize', 12);
+text(variableArrowPoint1(1) + 5, (variableArrowPoint1(2) - 100), "\theta = " + angle, 'Color', 'k', 'FontSize', 12);
+
+desiredPosition = angle;
+
+% Motor being at the origin
+% % Plot the reference arrow and text as well as the variable arrow
+% quiver(originImagePoint(1), originImagePoint(2), refernceArrowPoint(1), refernceArrowPoint(2), 0, "LineWidth", 2, "Color", STATS(shapeChoice1).Color);
+% text(offsetToImage(1) + 20, offsetToImage(2) + 10, "Reference", 'Color', STATS(shapeChoice1).Color, 'FontSize', 20);
+% quiver(offsetToImage(1), (offsetToImage(2) + imageSize(2)), variableArrowPoint1(1), variableArrowPoint1(2), 0, "LineWidth", 2, "Color", STATS(shapeChoice1).Color);
+% 
+% % Calculate the angle between the reference and the variable arrows
+% angle = acos(((refernceArrowPoint(1) * variableArrowPoint1(1)) + (variableArrowPoint1(2) * refernceArrowPoint(2))) / ...
+%     ((((refernceArrowPoint(1))^2 + (refernceArrowPoint(2))^2)^0.5) * (((variableArrowPoint1(1))^2 + (variableArrowPoint1(2))^2)^0.5)));
+% angle = round((angle * 180 / pi), 2);
+% 
+% % Display an arc between reference and varaible arrows as well as the angle
+% % Define parameters of the arc.
+% %Change OriginImagePoints 1 an 2 to change origin of the arc
+% radius = 50;
+% % Define the angle theta as going from 30 to 150 degrees in 100 steps.
+% theta = linspace(angle-90, -90, 100);
+% % Define x and y using "Degrees" version of sin and cos.
+% x = radius * cosd(theta) + originImagePoint(1); 
+% y = radius * sind(theta) + originImagePoint(2); 
+% % Now plot the points.
+% plot(x, y, "Color", STATS(shapeChoice1).Color, 'LineWidth', 2); 
+% text(offsetToImage(1) + 5, (originImagePoint(2) - 100), "\theta = " + angle, 'Color', STATS(shapeChoice1).Color, 'FontSize', 12);
+% 
+% desiredPosition = angle;
 
 
 % Function that prompts the user for shape selection
-function shapeChoice = chooseShapes(data, STATS, items)
+function shapeChoice = chooseShapes(STATS, items)
     % Displays the list of shapes for the user to choose from
     fprintf("Select a shape from the list below: \n");
     for i = 1:items
@@ -186,14 +239,6 @@ function shapeChoice = chooseShapes(data, STATS, items)
     end
     
     % Plot a green dot at the centroid of the selected shape
-    figure();
-    imshow(data.cur);
-    hold on;
-    
-    for i = 1:items
-        plot(STATS(i).Centroid(1),STATS(i).Centroid(2),'kO','MarkerFaceColor', 'k', 'MarkerSize', 3);
-        text(STATS(i).Centroid(1) - 10,STATS(i).Centroid(2) + 25, STATS(i).Shape, 'Color', STATS(i).Color);
-    end
     plot(STATS(shapeChoice).Centroid(1),STATS(shapeChoice).Centroid(2),'kO','MarkerFaceColor', [0, 0.9, 0.2], 'MarkerEdgeColor', [1, 1, 0.2], 'MarkerSize', 10);
 
 % Uncommet to prompt the user to confirm their shape selection
