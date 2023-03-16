@@ -1,0 +1,9 @@
+
+avrdude: AVR device initialized and ready to accept instructions
+avrdude: Device signature = 0x1e9801 (probably m2560)
+avrdude: reading input file "C:\Users\ahmot\OneDrive\Documents\github\ECE 4950 Senior Design\Project3/MotorModel_Sp23_V21b.hex"
+avrdude: writing flash (30236 bytes):
+avrdude: 30236 bytes of flash written
+
+avrdude done.  Thank you.
+

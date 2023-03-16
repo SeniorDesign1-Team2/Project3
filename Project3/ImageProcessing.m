@@ -139,6 +139,7 @@ end
 imageSize = [640, 480];
 offsetToImage = [182, 54];
 
+% Varialbe Motor Location
 % Calls the funciton to prompt the user to choose a shape
 fprintf("Motor Location\n");
 shapeChoice1 = chooseShapes(STATS, items);
@@ -181,13 +182,12 @@ else
     y = radius * sind(theta) + variableArrowPoint1(2);
 end
 
- 
 % Now plot the points.
 plot(x, y, "Color", STATS(shapeChoice1).Color, 'LineWidth', 2); 
 %text(variableArrowPoint1(1) + 5, (variableArrowPoint1(2) - 100), "\theta = " + angle, 'Color', STATS(shapeChoice1).Color, 'FontSize', 12);
 text(variableArrowPoint1(1) + 5, (variableArrowPoint1(2) - 100), "\theta = " + angle, 'Color', 'k', 'FontSize', 12);
 
-desiredPosition = angle;
+%desiredPosition = angle;
 
 % Motor being at the origin
 % % Plot the reference arrow and text as well as the variable arrow

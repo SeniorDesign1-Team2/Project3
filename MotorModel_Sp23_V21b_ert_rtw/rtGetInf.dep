@@ -1,0 +1,14 @@
+rtGetInf.o: \
+ C:\Users\ahmot\OneDrive\DOCUME~1\github\ECE495~1\Project3\MotorModel_Sp23_V21b_ert_rtw\rtGetInf.c \
+ C:\Users\ahmot\OneDrive\DOCUME~1\github\ECE495~1\Project3\MotorModel_Sp23_V21b_ert_rtw\rtGetInf.h \
+ C:\Users\ahmot\OneDrive\DOCUME~1\github\ECE495~1\Project3\MotorModel_Sp23_V21b_ert_rtw\rtwtypes.h \
+ C:/PROGRA~1/MATLAB/R2021b/extern/include/tmwtypes.h \
+ C:\Users\ahmot\OneDrive\DOCUME~1\github\ECE495~1\Project3\MotorModel_Sp23_V21b_ert_rtw\rt_nonfinite.h
+
+C:\Users\ahmot\OneDrive\DOCUME~1\github\ECE495~1\Project3\MotorModel_Sp23_V21b_ert_rtw\rtGetInf.h:
+
+C:\Users\ahmot\OneDrive\DOCUME~1\github\ECE495~1\Project3\MotorModel_Sp23_V21b_ert_rtw\rtwtypes.h:
+
+C:/PROGRA~1/MATLAB/R2021b/extern/include/tmwtypes.h:
+
+C:\Users\ahmot\OneDrive\DOCUME~1\github\ECE495~1\Project3\MotorModel_Sp23_V21b_ert_rtw\rt_nonfinite.h:
